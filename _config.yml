@@ -11,7 +11,7 @@ title: Testio Tech
 tagline: "A blog related to software testing"
 description: "Welcome to my blog related to software testing."
 url: https://testiotech.com/
-baseurl: https://testiotech.com/
+baseurl:
 
 author:
   name: "Daniel Phillips"

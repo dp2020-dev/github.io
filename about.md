@@ -21,7 +21,7 @@ Working in successful, productive agile teams in CI/CD projects has given me a g
 
 ## About the Testio Tech blog
 
-One of the interesting challenges of working in software testing is keeping up to date with the pace of change in our industry- for example disruption from AI, new or evolving test tools, certifications and so on. This blog will cover some of the ways I stay on top of these changes, I hope it will be useful for others.
+One of the interesting challenges of working in software testing is keeping up to date with the pace of change in our industry- for example disruption from AI, new or evolving test tools, certifications and more. This blog will cover some of the ways I learn and apply new (and existing) tools and strategies, I hope it will be useful for others.
 
 Finally, as I'm based in Wales the word 'Testio' is a slang/informal word for testing in Welsh (emphasis on informal) so its a bi-lingual blog title!
 

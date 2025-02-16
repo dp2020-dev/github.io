@@ -1,5 +1,6 @@
 # Dependencies
-markdown: redcarpet
+
+markdown: kramdown
 highlighter: pygments
 
 # Permalinks
@@ -10,6 +11,7 @@ permalink: pretty
 title: Testio Tech
 tagline: "A blog related to software testing"
 description: "Welcome to my blog related to software testing."
+
 url: https://testiotech.com/
 baseurl:
 
@@ -20,7 +22,13 @@ author:
 paginate: 5
 
 # Custom vars
-# version: 2.1.0
+
+version: 2.1.0
 
 github:
-  repo: https://github.com/dp2020-dev/github.io/
+  repo: https://github.com/dp2020-dev/github.io
+
+plugins:
+  - jekyll-gist
+
+

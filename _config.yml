@@ -1,26 +1,29 @@
 # Dependencies
-markdown:         redcarpet
-highlighter:      pygments
+markdown: kramdown
+highlighter: pygments
 
 # Permalinks
-permalink:        pretty
+permalink: pretty
 # relative_permalinks: true
 
 # Setup
-title:            Testio Tech
-tagline:          'A blog related to software testing'
-description:      'Welcome to my blog related to software testing.'
-url:              https://dp2020-dev.github.io
-baseurl:          
+title: Testio Tech
+tagline: "A blog related to software testing"
+description: "Welcome to my blog related to software testing."
+url: https://dp2020-dev.github.io
+baseurl:
 
 author:
-  name:           'Daniel Phillips'
-  url:            www.linkedin.com/in/daniel-phillips-ba99161b8
+  name: "Daniel Phillips"
+  url: www.linkedin.com/in/daniel-phillips-ba99161b8
 
-paginate:         5
+paginate: 5
 
 # Custom vars
-version:          2.1.0
+version: 2.1.0
 
 github:
-  repo:          https://github.com/dp2020-dev/dp2020-dev.github.io
+  repo: https://github.com/dp2020-dev/github.io
+
+plugins:
+  - jekyll-gist

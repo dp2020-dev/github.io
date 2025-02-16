@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Getting hands on with test tools- Cypress versus Playwright &middot; Testio Tech
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body>
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="">
+          Testio Tech
+        </a>
+      </h1>
+      <p class="lead">Welcome to my blog related to software testing.</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      
+      
+        
+          
+        
+      
+        
+          
+            <a class="sidebar-nav-item" href="/about/">About Me</a>
+          
+        
+      
+        
+      
+        
+          
+        
+      
+
+      <a class="sidebar-nav-item" href="https://testiotech.com/2024/12/08/dbt-expectations">Data testing with dbt-expectations</a>
+      <a class="sidebar-nav-item" href="https://testiotech.com/2024/01/26/5W-Framework">5W Framework for Generative AI</a>
+      <a class="sidebar-nav-item" href="https://testiotech.com/2023/11/10/AI-Fundamentals-AI900">AI900 AI Fundamentals</a>
+      <a class="sidebar-nav-item" href="https://testiotech.com/2023/10/28/compare-cypress-playwright">Cypress versus Playwright</a>
+      <span class="sidebar-nav-item">Currently v2.1.0</span>
+    </nav>
+
+    <p>&copy; 2025. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <div class="post">
+  <h1 class="post-title">Getting hands on with test tools- Cypress versus Playwright</h1>
+  <span class="post-date">28 Oct 2023</span>
+  <p><i>This post will give some practical advice on installing <a href="#-setting-up-cypress-and-run-tests">Cypress</a> and <a href="#-set-up-playwright-and-run-tests">Playwright</a> to create and run some simple UI tests, and <a href="#-summary">a brief comparison</a> between the two tools.</i></p>
+
+<p>Alongside Selenium, Cypress and Playwright are currently amongst the most widely used test automation tools. There is a lot of discussion about the pros and cons of each tool, which is the most suitable for a given project etc. but you may want to try these tools out for yourself, this post will help you to get up and running, and run some basic UI tests.</p>
+
+<p>To evaluate these tools myself, I set up <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests">a Git repo</a> to do some basic UI automation, one using Cypress the other Playwright to compare them side by side (I will add Selenium Webdriver soon). If you can set up these tools locally, you will be able to follow and implement the simple test plan outlined below, or alternatively clone the material in the repo itself and run it.</p>
+
+<blockquote>
+  <p>ⓘ For reference, I installed both tools on a Mac, and the system under test/code used was JavaScript. However, the instructions I link to cover Windows/Linux and other code bases.</p>
+</blockquote>
+
+<h3 id="test-plan">Test Plan</h3>
+
+<p>To compare these test tools, I used the <a href="https://testiotech.com/2024/01/26/5W-Framework/">5W</a> approach in ChatGPT to come up with this outline of a test scope:</p>
+
+<ul>
+<li>Page Loads: Ensure that specified page load correctly.</li>
+<li>Navigation: Verify the navigation within the web shop.</li>
+<li>Registered User Login: Test the login process for registered users.</li>
+<li>Add to Basket and Checkout: Check the functionality of adding items to the basket and completing the checkout process.</li>
+</ul>
+
+<p>The system under test used here (<a href="https://www.demoblaze.com">https://www.demoblaze.com</a>) has proven to be well suited for e-commerce UI testing, but you of course may have a preferred alternative (generally we’ll be covering standard e-commerce transactions).</p>
+
+<h3 id="setting-up-cypress-and-run-tests">Setting up Cypress and run tests</h3>
+
+<p>The documentation on installing Cypress itself is pretty user friendly, so rather than repeat material this section will highlight some of the key areas.</p>
+
+<p><a href="https://docs.cypress.io/guides/getting-started/installing-cypress#System-requirements">https://docs.cypress.io/guides/getting-started/installing-cypress#System-requirements</a></p>
+
+<blockquote>
+  <p>ⓘ If you see a <b> ‘Cypress Configuration Error’</b> when running ‘npx cypress open’ , ensure you are running cypress from the right folder level, it needs to be in a folder above the cypress.config.js level to avoid any config errors.</p>
+</blockquote>
+
+<p>Provided the installation has been successful, my preferred approach is to open a command line/terminal in the project folder, and run:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">npx</span> <span class="nx">cypress</span> <span class="nx">open</span></code></pre></figure>
+
+<p>This should open up the Cypress Launchpad, and for this post we’ll be concentrating on E2E testing (to cover an e-commerce system).</p>
+
+<p>Once cypress is up and running in the browser, my approach was to follow the Getting Started page to set up the first ‘E2E’ test, and build on that to start covering the project plan:</p>
+
+<p><a href="https://docs.cypress.io/guides/end-to-end-testing/writing-your-first-end-to-end-test">https://docs.cypress.io/guides/end-to-end-testing/writing-your-first-end-to-end-test</a></p>
+
+<h4 id="setting-the-baseurl">Setting the baseURL</h4>
+
+<p>For UI tests it’s very useful to not have to explicitly use the url of the system under test (e.g. www.demoblaze.com). We can define the baseUrl in the cypress.config.js in project root. Cypress calls this base url when ‘/’ is used in an E2E test, e.g.</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">cy</span><span class="p">.</span><span class="nf">visit</span><span class="p">(</span><span class="dl">'</span><span class="s1">/</span><span class="dl">'</span><span class="p">)</span> <span class="c1">// uses the baseUrl (i.e. www.demoblaze.com in our example) in the cypress.config to open the url.</span></code></pre></figure>
+
+<h4 id="fixtures">Fixtures</h4>
+
+<p>A lot of the UI tests in this plan use the same user details info for each test, and rather than repeat those strings in each test, we can define a fixture file to store all our log in data, and reuse it in each test.</p>
+
+<h5 id="example">Example:</h5>
+
+<p>In the fixtures file, the userDetails class contains user log in details:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="p">{</span>
+<span class="dl">"</span><span class="s2">username</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">test</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">password</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">test</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">welcomeText</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Welcome test</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Sid Spendalot</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">country</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">UK</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">city</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Testville</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">creditCard</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">554433221</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">month</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">April</span><span class="dl">"</span><span class="p">,</span>
+<span class="dl">"</span><span class="s2">year</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">2023</span><span class="dl">"</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>This class is used in E2E tests, e.g. in E2EloginPurchases test file, we get the fixture file:</p>
+
+<noscript><pre>400: Invalid request</pre></noscript>
+<script src="https://gist.github.com/2febfb086c687c0939edf2f1551e847b.js"> </script>
+
+<p>..and from that line on we can use the details from the fixture file in the test (i.e. the E2E test class is getting the userDetails.password &amp; userDetails.username are those defined in the fixture file):</p>
+
+<noscript><pre>400: Invalid request</pre></noscript>
+<script src="https://gist.github.com/dc6175465df73d5c706268bf8add1429.js"> </script>
+
+<p>In addition to Cypress documentation, this blog proved useful in understand more about Cypress Fixtures:
+[https://testersdock.com/cypress-fixtures/](https://testersdock.com/cypress-fixtures]</p>
+
+<h4 id="time-travel">Time Travel</h4>
+
+<p>The time travel feature is effectively a record of the changing state of the system under test, which has proven to be invaluable in understanding how the website behaves in response to our test inputs and for debugging.</p>
+
+<p>Lets demonstrate this by looking at an E2E test that uses our baseUrl set in config, and some of our imported fixture data.</p>
+
+<h5 id="example-1">Example</h5>
+
+<p>The <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/cypress/e2e/E2EloginPurchases.cy.js">E2EloginPurchases</a> E2E test verifies the log in process works with a valid username/password, and checks a successful log in message appears on screen.</p>
+
+<p><img src="/images/1_test_passes.png" alt="Passing E2E run in Cypress browser view" /></p>
+
+<p>In the spec window of Cypress browser we can see our test code has used our configured baseURL and knows ‘/’ should be ‘www.demoblaze.com’, and uses the imported config to pass in userName &amp; userPassword.</p>
+
+<p><img src="/images/2_travel_back.png" alt="Passing E2E run in Cypress browser view" /></p>
+
+<p>On the successful run, we can see the test step to verify a message appears on screen ‘Welcome <user name="">' ('Welcome test' in this case):</user></p>
+
+<p><img src="/images/3_loggedIn.png" alt="Passing E2E run in Cypress browser view" /></p>
+
+<p>The advantage of time travel is that it makes it really convenient and efficient to check the variables we’re passing in, and how the system behaves. If we have a failing test, we can efficiently debug by ‘travelling’ to the steps in question. In the example below, the test step expects a different user name to what’s being passed on screen.</p>
+
+<p><img src="/images/4_failed_test.png" alt="Passing E2E run in Cypress browser view" /></p>
+
+<p>The failed step is identified and we can have a closer look at exactly what was happening at that point on the system under test.</p>
+
+<h3 id="cypress---summary">Cypress - Summary</h3>
+
+<p>In summary, the Cypress documentation allows us to get up and running pretty quickly, and the example given of setting up the first test allows us to build up the test plan. In the post we had a quick look at setting a base url and test config, and I personally I was impressed with the [time travel feature]- {#cypress_page_locator}some of the page elements on the system under test were difficult to identify in javascript, the time travel showed the exact stage and screen where the issues were, which was invaluable when it came to debugging.</p>
+
+<h2 id="set-up-playwright-and-run-tests">Set up Playwright and run tests</h2>
+
+<p><i> This is a rough guide to get up and running (follow the links for more detailed instruction) and we’ll use the same test plan as mentioned in <a href="#test-plan">Test Plan.</a></i></p>
+
+<h3 id="installation">Installation</h3>
+
+<p>To install and configure Playwright, I used the following guide which got me up &amp; running:</p>
+
+<p><a href="https://techcommunity.microsoft.com/t5/azure-architecture-blog/automating-end-to-end-testing-with-playwright-and-azure/ba-p/3883704">Automating End-to-End testing with Playwright and Azure Pipelines</a></p>
+
+<p>I recommend setting up the folder structure using Visual Studio Code (see step 2 of the linked guide.) You’ll also need an NPM package installed as mentioned in the guide, this should be installed in step 6 by running:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">npm</span> <span class="nx">init</span> <span class="nx">playwright</span><span class="p">@</span><span class="nd">latest</span></code></pre></figure>
+
+<blockquote>
+  <p>ⓘ during installation step 6 ‘Execute Playwright Test Script’ would not work for me, my solution was to change directory (in command line/terminal) to my playwright project folder, then run: <b>npm init playwright@latest</b></p>
+</blockquote>
+
+<h4 id="run-tests-directly-in-visual-studio-code">Run tests directly in Visual Studio Code</h4>
+
+<p>To run directly in VSC, you need to install playwright extension, as per:
+<a href="https://playwright.dev/docs/getting-started-vscode#installation">https://playwright.dev/docs/getting-started-vscode#installation</a>.</p>
+
+<p>Once installed you should see a green run icon in the test spec window:
+<img src="/images/VSC_pw_run_icon.png" alt="VSC run icon" /></p>
+
+<h3 id="create-tests">Create tests</h3>
+
+<p>The initial set up of Playwright helpfully includes a file called <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/tests/demo.spec.ts">tests/example.spec.ts</a>, this gives us a solid example to explain how the tool works, and I used this to build up the test scope.</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">import</span> <span class="p">{</span> <span class="nx">test</span><span class="p">,</span> <span class="nx">expect</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@playwright/test</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="nf">test</span><span class="p">(</span><span class="dl">'</span><span class="s1">has title</span><span class="dl">'</span><span class="p">,</span> <span class="k">async </span><span class="p">({</span> <span class="nx">page</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nf">goto</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://playwright.dev/</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="c1">// Expect a title "to contain" a substring.
+</span>
+<span class="k">await</span> <span class="nf">expect</span><span class="p">(</span><span class="nx">page</span><span class="p">).</span><span class="nf">toHaveTitle</span><span class="p">(</span><span class="sr">/Playwright/</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nf">test</span><span class="p">(</span><span class="dl">'</span><span class="s1">get started link</span><span class="dl">'</span><span class="p">,</span> <span class="k">async </span><span class="p">({</span> <span class="nx">page</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nf">goto</span><span class="p">(</span><span class="dl">'</span><span class="s1">https://playwright.dev/</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="c1">// Click the get started link.
+</span>
+<span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nf">getByRole</span><span class="p">(</span><span class="dl">'</span><span class="s1">link</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Get started</span><span class="dl">'</span> <span class="p">}).</span><span class="nf">click</span><span class="p">();</span>
+
+<span class="c1">// Expects page to have a heading with the name of Installation.
+</span>
+<span class="k">await</span> <span class="nf">expect</span><span class="p">(</span><span class="nx">page</span><span class="p">.</span><span class="nf">getByRole</span><span class="p">(</span><span class="dl">'</span><span class="s1">heading</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Installation</span><span class="dl">'</span> <span class="p">})).</span><span class="nf">toBeVisible</span><span class="p">();</span>
+<span class="p">});</span></code></pre></figure>
+
+<p>To run tests, use the following command in either VSC or the command line/terminal.</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">npx</span> <span class="nx">playwright</span> <span class="nx">test</span> <span class="o">--</span></code></pre></figure>
+
+<h3 id="playwright-codegen">Playwright codegen</h3>
+
+<p>Playwright has an impressive feature to record script automatically called Codegen. In theory it can record the whole log in, add item to basket etc. steps for us, but I found it more useful to find those page elements which were <a href="cypress_page_locator">awkward to find and use in Cypress.</a>
+For example, if we run the following command, the specified website and Playwright inspector will load up.</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">npx</span> <span class="nx">playwright</span> <span class="nx">codegen</span> <span class="nx">browserstack</span><span class="p">.</span><span class="nx">com</span></code></pre></figure>
+
+<p>We can undertake our actions on the website, e.g. lets click log in, and input a user name and password. As you can see in the clip below, the user actions in the browser is tracked in the Playwright Inspector, so we can see the locators, tags and roles etc.</p>
+
+<iframe width="427" height="240" src="/images/PW_Codegen.mp4" title="Codegen with browser and inspector windows" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+
+<p>In my experience, it didn’t quite capture the whole test code I needed, but it definitely saved time in getting the right elements.</p>
+
+<p>Browerstack has a useful summary here: <a href="https://www.browserstack.com/guide/playwright-debugging#:~:text=Playwright%20is%20an%20open%2Dsource,the%20headful%20mode%20for%20tests">www.browserstack.com/guide/playwright-debugging/</a></p>
+
+<h3 id="authenticated-log-in-state">Authenticated log in state</h3>
+
+<p>Rather than have to repeat the log in steps explicitly for each test that requires a logged in user (e.g. adding items to cart and checking out), its possible to save the ‘logged in state’ to a setting in the <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/playwright/.auth/user.json">.config.ts file</a>:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">storageState</span><span class="p">:</span> <span class="dl">"</span><span class="s2">playwright/.auth/user.json</span><span class="dl">"</span></code></pre></figure>
+
+<p>This object points at <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/tests/auth.setup.ts">auth.setup</a> (which is in the testDir location specified in the config). This file is effectively the successful log in test, and writes its logged in state back to the user.json file configured in playwright.config:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="k">await</span> <span class="nx">page</span><span class="p">.</span><span class="nf">context</span><span class="p">().</span><span class="nf">storageState</span><span class="p">({</span> <span class="na">path</span><span class="p">:</span> <span class="nx">authFile</span> <span class="p">});</span></code></pre></figure>
+
+<p>Now, by importing the Test class, the logged in state is used, i.e. each test which imports this class is in a logged state as a begin action.</p>
+
+<p>If you want to see this applied, see the <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/tests/auth.setup.ts">auth.setup</a> file in playwright/tests, and the <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/playwright/.auth/user.json">user.json</a> in playwright/playwright/.auth, or checkout this helpful write up: <a href="https://www.cuketest.com/playwright/docs/auth/">https://www.cuketest.com/playwright/docs/auth/</a></p>
+
+<h3 id="traceviewer">Traceviewer</h3>
+
+<p>Traceviewer allows us to review a record of completed tests, similar in a way to Cypress Time travel (which we looked at previously), it reports the test result and allows us to check the outcome of each test step. The benefits here are for reporting itself, and when necessary for debugging, we can review a failed test and see exactly where/why it failed the given test step.</p>
+
+<p>To enable traceviewer, we need the following value in the <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/playwright.config.ts">config</a> file.</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="o">/</span><span class="nx">_</span> <span class="nx">Collect</span> <span class="nx">trace</span> <span class="nx">when</span> <span class="nx">retrying</span> <span class="nx">the</span> <span class="nx">failed</span> <span class="nx">test</span><span class="p">.</span> <span class="nx">See</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//playwright.dev/docs/trace-viewer _/
+</span>
+<span class="nx">trace</span><span class="p">:</span> <span class="dl">"</span><span class="s2">on-first-retry</span></code></pre></figure>
+
+<p>Lets demonstrate how to use traceviewer by change one of our passing tests so it fails. In <a href="https://github.com/dp2020-dev/blazemeter-ecommerce-automated-tests/blob/main/playwright/tests/login.spec.ts">login.steps</a> , the log in message when logging in is <b>‘Welcome test’</b> (test being the username), so lets change the expected value in the test to <b>‘Welcome visitor’</b>:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">test</span><span class="p">.</span><span class="nf">describe</span><span class="p">(</span><span class="dl">"</span><span class="s2">Log in tests</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<span class="nf">test</span><span class="p">(</span><span class="dl">"</span><span class="s2">Successful log</span><span class="dl">"</span><span class="p">,</span> <span class="k">async </span><span class="p">({</span> <span class="nx">page</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<span class="kd">const</span> <span class="nx">loginPage</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">login</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="k">await</span> <span class="nx">loginPage</span><span class="p">.</span><span class="nf">initializeLocators</span><span class="p">();</span>
+<span class="k">await</span> <span class="nx">loginPage</span><span class="p">.</span><span class="nf">loginFunction</span><span class="p">(</span><span class="dl">"</span><span class="s2">test</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">test</span><span class="dl">"</span><span class="p">);</span>
+<span class="k">await</span> <span class="nf">expect</span><span class="p">(</span>
+<span class="nx">page</span><span class="p">.</span><span class="nf">getByRole</span><span class="p">(</span><span class="dl">"</span><span class="s2">link</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Welcome visitor</span><span class="dl">"</span> <span class="p">})</span>
+<span class="p">).</span><span class="nf">toBeVisible</span><span class="p">();</span></code></pre></figure>
+
+<p>To run traceviewer, go to the command line/terminal and input:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">npx</span> <span class="nx">playwright</span> <span class="nx">test</span> <span class="nx">login</span><span class="p">.</span><span class="nx">spec</span><span class="p">.</span><span class="nx">ts</span><span class="p">:</span><span class="mi">10</span> <span class="o">--</span><span class="nx">trace</span> <span class="nx">on</span></code></pre></figure>
+
+<p>This runs traceviewer for the specified test.</p>
+
+<p><img src="/images/Traceviewer1.png" alt="Traceviewer running" /></p>
+
+<p>Traceviewer saves the test run in a zip file, you can also view it in the browser, for example:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">Serving</span> <span class="nx">HTML</span> <span class="nx">report</span> <span class="nx">at</span> <span class="nx">http</span><span class="p">:</span><span class="c1">//localhost:57023. Press Ctrl+C to quit.</span></code></pre></figure>
+
+<p><img src="/images/Traceviewer2.png" alt="Traceviewer test steps and traces" /></p>
+
+<p>The test report shows us the failing test, and clicking trace allows us to see screenshots of each test step. We can see that the message on screen is ‘Welcome test’ not ‘Welcome visitor’.</p>
+
+<p><img src="/images/Traceviewer3.png" alt="Traceviewer screenshots of failed test step" /></p>
+
+<p>This is a really good explanation and summary of Traceviewer, from the official Playwright channel:</p>
+
+<iframe width="427" height="240" src="https://www.youtube.com/embed/lfxjs--9ZQs" title="Viewing Playwright traces" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+
+<h2 id="summary---playwright">Summary - Playwright</h2>
+
+<p>I found Playwright relatively straightforward to get up and running quickly, and am impressed by the utility and intuitiveness of codegen and traceviewer. We used a simple example <a href="#-traceviewer">above</a> for traceviewer but it definitely enables quick and effective reporting and debugging, and the codegen tool did help in finding the more awkward page elements which took more time in Cypress.</p>
+
+<h1 id="cypress-versus-playwright-and-selenium">Cypress versus Playwright (and Selenium)</h1>
+
+<p><i> This is a summary of what we’ve seen in this exercise, and compares to a tool I am more familiar with, Selenium.</i></p>
+
+<p>Both Cypress and Playwright are marketed as more ‘modern’ to use than the older Selenium, and this exercise has demonstrated to me that both Cypress &amp; Playwright are more ‘lightweight’ to install, intuitive to use and quicker to get up and running and getting good UI test coverage efficiently. <a href="https://docs.cypress.io/guides/overview/why-cypress#Our-mission">Cypress documentation</a> states it should ideally be used when building a web application, and I can see how its user friendliness would enable devs/testers to efficiently undertake good test driven design.</p>
+
+<p>The debugging and selection tools mentioned in this exercise were a big help, and well designed in my opinion. The impressive built in reporting tool (Traceviewer) in Playwright is something Selenium lacks (at least without a plug in).</p>
+
+<p>However, there are some points to consider when we compare to what is still the mostly widely used alternative, Selenium. Both Cypress and Playwright can be described as ‘opinionated’ i.e. they are designed in a specific way to work efficiently but therefore have constraints on how they are used. For example, both tools have implicit waits (i.e. a test step waits for an element to load). This is at first a glance an advantage, it allows the page to load and the test to proceed. However, it may mask a performance issue, perhaps the delay in loading is not acceptable for the users. Selenium does not have this implicit wait, you can add one to a test but its not the default.</p>
+
+<p>While the ease of use can appear to be an advantage, perhaps Selenium’s flexibility in being able to integrate other third party tools and plug ins means it remains more adaptable, and can be used in a broader range of projects.</p>
+
+<p>Given the age of Selenium, which has been around substantially longer than the other tools, it has a wealth of support and knowledge available online, the others are building that legacy too but you will generally find someone has had the same issue you have in Selenium!</p>
+
+<p>To wrap up, I would recommend anyone weighing up the pros and cons of Cypress versus Playwright (and of course Selenium) to try out the tools as demonstrated in this blog. I found it invaluable to see for myself how Cypress and Playwright really do offer something different, and perhaps more ‘modern’, but its interesting to note I use Selenium on my day to day work.</p>
+
+<blockquote>
+  <p>ⓘIn future I will add a 3rd project to my github repo to cover off the <a href="#test-plan">test plan</a> for Selenium webdriver.</p>
+</blockquote>
+
+</div>
+
+<script
+  src="https://giscus.app/client.js"
+  data-repo="dp2020-dev/dp2020-dev.github.io"
+  data-repo-id="R_kgDOLyzHLg"
+  data-category="Announcements"
+  data-category-id="DIC_kwDOLyzHLs4Cf-JE"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="preferred_color_scheme"
+  data-lang="en"
+  crossorigin="anonymous"
+  async
+></script>
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+    <li>
+      <h3>
+        <a href="/2024/12/08/dbt-expectations/">
+          Testing dbt data transformations, including dbt-expectations.
+          <small>08 Dec 2024</small>
+        </a>
+      </h3>
+    </li>
+    
+    <li>
+      <h3>
+        <a href="/2024/01/26/5W-Framework/">
+          Use the 5W framework to get your own personal study plan from ChatGPT, Gemini, Copilot or other LLM/Generative AI tool.
+          <small>26 Jan 2024</small>
+        </a>
+      </h3>
+    </li>
+    
+    <li>
+      <h3>
+        <a href="/2023/11/10/AI-Fundamentals-AI900/">
+          Azure AI Fundamentals (AI-900)
+          <small>10 Nov 2023</small>
+        </a>
+      </h3>
+    </li>
+    
+  </ul>
+
+  <!-- Cloudflare Web Analytics -->
+  <script
+    defer
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon='{"token": "3a11c431cd8a4d7cabd32f8fff284953"}'
+  ></script>
+  <!-- End Cloudflare Web Analytics -->
+</div>
+
+    </div>
+    <body class="theme-base-0d">
+
+  </body>
+
+
+  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3a11c431cd8a4d7cabd32f8fff284953"}'></script><!-- End Cloudflare Web Analytics -->
+
+</html>

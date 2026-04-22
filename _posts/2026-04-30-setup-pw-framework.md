@@ -10,7 +10,7 @@ title: Testing dbt data transformations, including dbt-expectations.
 
 ### Why data testing?
 
-From my experience with data transformation projects in the past (e.g. moving data from on prem to the Azure cloud) I'm aware of the challenges of ensuring the quality of data taken from multiple sources into target tables, the transformations at each stage and maintaining this quality continuously in a CI/CD delivery. This complexity makes manual testing onerous (especially given the transformations are likely to be part of an automated pipeline), with an underlying risk that errors in the end data can erode the user's confidence in the data being consumed.
+taining this quality continuously in a CI/CD delivery. This complexity makes manual testing onerous (especially given the transformations are likely to be part of an automated pipeline), with an underlying risk that errors in the end data can erode the user's confidence in the data being consumed.
 
 Given this context, being able to create efficient, discrete scripted tests at the key stages of a data pipeline using sql and built in dbt tests are a powerful, efficient way to ensure data quality throughout a data transformation project. [Great Expectations.io](https://greatexpectations.io/) and the dbt-specific version [dbt-expectations](https://github.com/calogica/dbt-expectations) offer a user friendly framework to further extend test coverage.
 

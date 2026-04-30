@@ -3,7 +3,7 @@ layout: post
 title: Setting up a Playwright framework to test a web based app.
 ---
 
-<i> This post is an example of setting up a playwright test framework for a web application. It assumes Playwright has already been installed and configured for VSC [(see previous blog post for a remainder)](/2023/10/28/compare-cypress-playwright/#set-up-playwright-and-run-tests), but focuses on project structure, how to effectively use fixtures/page to set up and use resources for that specific test class, api testing, integration versus component tests and more.
+<i> This post is an example of setting up a playwright test framework for a web application. It assumes Playwright has already been installed and configured for Visual Studio Code [(see previous blog post for a remainder)](/2023/10/28/compare-cypress-playwright/#set-up-playwright-and-run-tests).
 </i>
 
 # Contents
@@ -13,13 +13,16 @@ title: Setting up a Playwright framework to test a web based app.
 
 ## Introduction
 
-Any cloud based software project involving CI/CD needs efficient regression testing to verify the quality of the code. This simple project described in System Under Test allows us to apply a Playwright framework to verify rest api calls, the integration of the back end and front end, and the UI front end. 
-The previous playwright post described some of the tools and ways to write test scripts, however this post is focussed on how to apply and structure the framework, with some straightforward examples usign actual tests to demonstarte component versus integration tests, how to handle test data, api testing and more.
+As of 2026 Playwright has become increasingly in demand in the role of a Software Test Engineer- its now overtaken Cypress in GitHub, and is mentioned more often in job specs (ContextQA, "Playwright vs Selenium vs Cypress in 2026", April 2026). If you're new to Playwright or want to know ore, the good news is in my experience its straightforward to install, and intuitive to start using- see my experience of this [here](/2023/10/28/compare-cypress-playwright/#set-up-playwright-and-run-tests). 
+
+This post takes it a step further in setting up a playwright framework for a simple web app [simple web app](#system-under-test), it demonstrates some of the key points around structure, using fixtures and pages for each test, api testing, managing test data and covers some of the powerful tools playwright has. Note that this is by no means a full list of Playwright capabilities, but does give practical examples, and links to the Playwright documentation where appropriate if you want the full detail.
+
+//many concepts are the same OOP concepts used in Cypress/Sel but worth emphasising.
 
 
 ## System Under Test
 
-The system under test for this post is an application I have created which uses a sql backend, and spring boot to set up a web based front end, served by rest apis. This was a straightforward architecture but is relevant in my experience to commercial projects- its possible to use any example project that follows this structure:
+The system under test for this post is an application created which uses a sql backend, and spring boot to set up a web based front end, served by rest apis. This was a straightforward architecture but is relevant in my experience to commercial projects- its possible to use any example project that follows this structure:
 
 | Layer       | Technology                                                        |
 | ----------- | ----------------------------------------------------------------- |
@@ -36,9 +39,9 @@ The system under test for this post is an application I have created which uses 
 
 ### Abstracting page objects and helpers
 
-A playwright test for a web app will involve interacting and verifying a web page, or multiple web pages. Using the page object model in playwright allows each page to have its own class for locators, helpers etc. so multiple tests can re-use this page class. For example in this project, Page Object Model for the landing page. Contains all locators and helper functions relevant to the index page tests.
+Using the page object model in playwright allows each page to have its own class for locators, helpers etc. so multiple tests can re-use this page class. For example in this project, the Page Object Model 'indexPage' for the landing page contains all locators and helper functions relevant to the index page tests.
  
- This approach can be used for other component objects (sidebars, footers etc.), is more maintainable as we only have to update locators in one place, and the test itself is a lot more readable- it only needs to focus on the logic of the test, the implementation is abstracted to the page class.
+ This approach can be used for other component objects (sidebars, footers etc.), and as we only have to update locators in one place is maintainable, and as the locators/helpers are abstracted to this page class the test class is a lot more readable- it only needs to focus on the logic of the test, the implementation is abstracted to the page class.
 
 Example- in this integration test, the `indexPage` page is imported and the test can use the `performSearch` helper.:
 
@@ -64,7 +67,9 @@ The indexPage page class contains the `performSearch` method:
 
 ### Component versus Integration<br>
 
-The test folder covers two different levels of testing- component and integration tests:
+The test folder covers two different levels of testing- component and integration tests. 
+
+> **Note:** By default playwright sets up an e2e By default Playwright (and other tools like Cypress) assume there is a third level at the top of >the test pyramid, end to end (e2e). For this project given there are no detailed user actions such as auth log in, add/remove books the UI is >essentially covered in the integration tests, but be aware you would usually see an e2e level as well.
 
 **Integration tests** — real Spring Boot + real SQLite
 
@@ -77,8 +82,6 @@ The test folder covers two different levels of testing- component and integratio
 - Test the frontend in isolation
 - No backend needed at all
 - Faster, great for edge cases
-
-> **Note:** By default playwright sets up an e2e 
 
 ### Integration tests
 

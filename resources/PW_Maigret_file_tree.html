@@ -1,0 +1,71 @@
+
+<style>
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 1.9; padding: 1.5rem; color: var(--color-text-primary); }
+  .tree .row { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+  .tree .row:hover { background: var(--color-background-secondary); border-radius: 4px; }
+  .label { color: var(--color-text-primary); font-weight: 500; }
+  .sub   { color: var(--color-text-secondary); font-size: 12px; font-family: var(--font-sans); margin-left: 4px; }
+  .c-dir    { color: #185FA5; }
+  .c-config { color: #854F0B; }
+  .c-test   { color: #0F6E56; }
+  .c-data   { color: #993556; }
+  .c-out    { color: #888780; }
+  .pipe { color: var(--color-text-tertiary); user-select: none; }
+  .badge { display: inline-block; font-size: 10px; font-family: var(--font-sans); padding: 1px 6px; border-radius: 10px; margin-left: 6px; vertical-align: middle; font-weight: 500; }
+  .b-config { background: #FAEEDA; color: #633806; }
+  .b-test   { background: #E1F5EE; color: #085041; }
+  .b-data   { background: #FBEAF0; color: #72243E; }
+  .b-out    { background: #F1EFE8; color: #444441; }
+  @media (prefers-color-scheme: dark) {
+    .c-dir    { color: #85B7EB; }
+    .c-config { color: #FAC775; }
+    .c-test   { color: #5DCAA5; }
+    .c-data   { color: #ED93B1; }
+    .c-out    { color: #B4B2A9; }
+    .b-config { background: #412402; color: #FAC775; }
+    .b-test   { background: #04342C; color: #9FE1CB; }
+    .b-data   { background: #4B1528; color: #F4C0D1; }
+    .b-out    { background: #2C2C2A; color: #D3D1C7; }
+  }
+</style>
+
+<div class="tree">
+
+  <div class="row"><span class="c-dir label">project-root/</span></div>
+
+  <div class="row"><span class="pipe">├── </span><span class="c-config label">playwright.config.ts</span><span class="sub">base URL, projects, test directories</span><span class="badge b-config">config</span></div>
+  <div class="row"><span class="pipe">├── </span><span class="c-config label">tsconfig.json</span><span class="sub">TypeScript compiler settings</span><span class="badge b-config">config</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">├── </span><span class="c-dir label">fixtures/</span></div>
+  <div class="row"><span class="pipe">│   └── </span><span class="label">base.fixture.ts</span><span class="sub">wires pages into every test</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">├── </span><span class="c-dir label">pages/</span><span class="sub">one class per app page or component</span></div>
+  <div class="row"><span class="pipe">│   ├── </span><span class="label">index.page.ts</span></div>
+  <div class="row"><span class="pipe">│   └── </span><span class="label">other-page.ts</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">├── </span><span class="c-dir label">utils/</span></div>
+  <div class="row"><span class="pipe">│   └── </span><span class="sub">date formatters, string helpers — reusable functions not tied to a specific page</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">├── </span><span class="c-data label">test-data/</span><span class="badge b-data">data</span></div>
+  <div class="row"><span class="pipe">│   ├── </span><span class="label">test.db</span><span class="sub">active test database</span></div>
+  <div class="row"><span class="pipe">│   ├── </span><span class="label">test-seed.db</span><span class="sub">clean seed — copied over test.db on reset</span></div>
+  <div class="row"><span class="pipe">│   └── </span><span class="label">mock-responses/</span><span class="sub">JSON fixtures for page.route() mocks</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">└── </span><span class="c-test label">tests/</span><span class="badge b-test">tests</span></div>
+  <div class="row"><span class="pipe">    ├── </span><span class="label">global-setup.ts</span><span class="sub">copies seed DB before suite runs</span></div>
+  <div class="row"><span class="pipe">    ├── </span><span class="label">global-teardown.ts</span><span class="sub">resets DB after suite</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">    ├── </span><span class="c-dir label">component/</span><span class="sub">mocked APIs — no backend needed</span></div>
+  <div class="row"><span class="pipe">    │   └── </span><span class="label">component-tests.spec.ts</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">    ├── </span><span class="c-dir label">integration/</span><span class="sub">real DB + real API</span></div>
+  <div class="row"><span class="pipe">    │   ├── </span><span class="label">integration-tests.spec.ts</span></div>
+  <div class="row"><span class="pipe">    │   └── </span><span class="c-data label">__snapshots__/</span><span class="sub">baseline images for visual comparison tests</span><span class="badge b-data">snapshots</span></div>
+
+  <div class="row" style="margin-top:4px"><span class="pipe">    └── </span><span class="c-dir label">e2e/</span><span class="sub">full user journeys — top of the test pyramid</span></div>
+  <div class="row"><span class="pipe">        └── </span><span class="label">user-journeys.spec.ts</span></div>
+
+  <div class="row" style="margin-top:12px"><span class="pipe">── </span><span class="c-out label">playwright-report/</span><span class="sub">auto-generated HTML report</span><span class="badge b-out">output</span></div>
+  <div class="row"><span class="pipe">── </span><span class="c-out label">.github/workflows/playwright.yml</span><span class="sub">CI pipeline config</span><span class="badge b-out">CI</span></div>
+
+</div>

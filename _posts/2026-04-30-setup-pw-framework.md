@@ -7,22 +7,23 @@ title: Setting up a Playwright framework to test a web based app.
 </i>
 
 # Contents
+{: .no_toc}
 
 * TOC
 {:toc}
 
 ## Introduction
 
-As of 2026 Playwright has become increasingly in demand in the role of a Software Test Engineer- its now overtaken Cypress in GitHub, and is mentioned more often in job specs (ContextQA, "Playwright vs Selenium vs Cypress in 2026", April 2026). If you're new to Playwright or want to know ore, the good news is in my experience its straightforward to install, and intuitive to start using- see my experience of this [here](/2023/10/28/compare-cypress-playwright/#set-up-playwright-and-run-tests). 
+As of 2026 Playwright has become increasingly in demand in the role of a Software Test Engineer- its now is rapidly closing the gap on other tools (<i>source: [ContextQA, "Playwright vs Selenium vs Cypress in 2026", April 2026](https://contextqa.com/blog/what-is-playwright-vs-selenium-vs-cypress-2026/#:~:text=2))</i>. If you're new to Playwright or want to know more, the good news is in my experience its straightforward to install, and intuitive [to start using.](/2023/10/28/compare-cypress-playwright/#set-up-playwright-and-run-tests)
 
-This post takes it a step further in setting up a playwright framework for a simple web app [simple web app](#system-under-test), it demonstrates some of the key points around structure, using fixtures and pages for each test, api testing, managing test data and covers some of the powerful tools playwright has. Note that this is by no means a full list of Playwright capabilities, but does give practical examples, and links to the Playwright documentation where appropriate if you want the full detail.
+This post takes it a step further in setting up a playwright framework for a simple web app [simple web app](#system-under-test), demonstrates some of the key points around structure, using fixtures and pages for each test, api testing, managing test data and covers some of the powerful tools playwright has. This is by no means a full list of Playwright capabilities, but does give practical examples on how to go about structuring the playwright framework, and links to the Playwright documentation where appropriate if you want the full detail.
 
-//many concepts are the same OOP concepts used in Cypress/Sel but worth emphasising.
+> **Note:** By default Playwright (and other tools like Cypress) assume there is a third level at the top of the test pyramid, end to end (e2e). For this project given there are no detailed user actions such as auth log in, add/remove books the UI is >essentially covered in the integration tests, but be aware you would usually see an e2e level as well.
 
 
 ## System Under Test
 
-The system under test for this post is an application created which uses a sql backend, and spring boot to set up a web based front end, served by rest apis. This was a straightforward architecture but is relevant in my experience to commercial projects- its possible to use any example project that follows this structure:
+The system under test for this post is an application I created which uses a sql backend, and spring boot to set up a web based front end, served by rest APIs. This was a straightforward architecture but is relevant in my experience to commercial projects- its possible to use any example project that follows this structure:
 
 | Layer       | Technology                                                        |
 | ----------- | ----------------------------------------------------------------- |
@@ -32,18 +33,20 @@ The system under test for this post is an application created which uses a sql b
 | Tests       | Playwright (TypeScript or Java)                                   |
 | Front end   | html                                                              |
 
-> **Note:** Its feasible to use a test website like www.demoblaze.com which has APIs, a front end etc. but this 
+> **Note:** Its feasible to use a test website like [www.demoblaze.com](www.demoblaze.com) which has APIs, a front end etc. but this 
 > project enables test data management, and a closer look at back end data. 
 
 ## Playwright Structure
 
+//TODO: Intro
+
 ### Abstracting page objects and helpers
 
-Using the page object model in playwright allows each page to have its own class for locators, helpers etc. so multiple tests can re-use this page class. For example in this project, the Page Object Model 'indexPage' for the landing page contains all locators and helper functions relevant to the index page tests.
+Using the page object model in playwright allows each web/application page to have its own class for locators, helpers etc. so multiple tests can re-use this page class. For example in this project, the Page Object Model 'indexPage' for the landing page contains all locators and helper functions relevant to the index page tests.
  
  This approach can be used for other component objects (sidebars, footers etc.), and as we only have to update locators in one place is maintainable, and as the locators/helpers are abstracted to this page class the test class is a lot more readable- it only needs to focus on the logic of the test, the implementation is abstracted to the page class.
 
-Example- in this integration test, the `indexPage` page is imported and the test can use the `performSearch` helper.:
+Example: in this integration test, the `indexPage` page is imported and the test can use the `performSearch` helper.:
 
 ```typescript
 test('search word not found, returns no results', async ({ indexPage }) => {
@@ -67,9 +70,7 @@ The indexPage page class contains the `performSearch` method:
 
 ### Component versus Integration<br>
 
-The test folder covers two different levels of testing- component and integration tests. 
-
-> **Note:** By default playwright sets up an e2e By default Playwright (and other tools like Cypress) assume there is a third level at the top of >the test pyramid, end to end (e2e). For this project given there are no detailed user actions such as auth log in, add/remove books the UI is >essentially covered in the integration tests, but be aware you would usually see an e2e level as well.
+The test folder for this project covers two different levels of testing- component and integration tests. 
 
 **Integration tests** — real Spring Boot + real SQLite
 
@@ -77,22 +78,25 @@ The test folder covers two different levels of testing- component and integratio
 - Need the test DB
 - Slower, but proves end-to-end behaviour
 
-**Mock/UI tests** — Playwright intercepts all API calls
+**Component tests** — Playwright intercepts all API calls
 
 - Test the frontend in isolation
-- No backend needed at all
+- No backend needed (still needs the front end server running)
 - Faster, great for edge cases
+
+In [integration tests](#integration-tests) we look at a straightforward example to see Playwright syntax, and also consider how to handle test data where an integration test does a write/update action. The project's [component tests](#mocking-data-for-component-tests) includes tests which mock data, and we look at page.route().
+
 
 ### Integration tests
 
-Integration tests <i>interact</i> with the backend data and the front end ui, and are used to test the end-to-end process i.e. a button click initiates and api to fetch data, and a result is displayed on the dront end. 
+Integration tests <i>interact</i> with the backend data and the front end ui, and are used to test the end-to-end process i.e. a button click initiates an api to fetch data, and the response is displayed on the front end. 
 
 For example the integration test `search word not found, returns no results` involves: <br>
 * inputting a search word in the 'Search for a Book' field e.g. <i>'green' </i><br>
 * clicking search to trigger the url `http://localhost:8080/api/books/search?keyword=green<br>
 * There are currently no books in the books table with 'green' in the title, so the response returned is an empty array [] - front end displays "No books found."
 
-In the screenshot below clicking 'Search' where the search word is 'green' creates an API endpoint to read the books table, searchging for the keyword green (`http://mafonpi:8080/api/books/search?keyword=green`):
+In the screenshot below clicking 'Search' where the search word is 'green' creates an API endpoint to read the books table, searching for the keyword green (`../api/books/search?keyword=green`):
 
 ![Network tab for book search](/images/pw_integration_frontend.jpg)
 
@@ -105,32 +109,60 @@ This api endpoint reaches the test `books` sql table, note are no books with 'gr
 
 ### Managing test data
 
-The previous integration test read the data in the database, but in the UI test class we alse have a test that updates values:
+The previous integration test read the data in the database, but in the UI test class we also have a test `updating a book from unread to read` that updates values:
+``` typescript
+test('updating a book from unread to read', async ({ indexPage}) => {
+  await indexPage.goto();
+  await indexPage.getBookCardByTitle("The Yellow Cat")
+  await expect(indexPage.statusBadge('The Yellow Cat', 'unread')).toBeVisible();
+  await indexPage.markAsRead('The Yellow Cat');
+  await expect(indexPage.statusBadge('The Yellow Cat', 'read')).toBeVisible();
+});
+```
+This test changes the status of a book to read, which would change the number of read versus unread books on the index page. The integration test class has subsequent tests which verify the expected number of read books, which would then fail if this test changes that data.
 
-`updating a book from unread to read`
-
-This test changes the status of a book to read, which would obviously change the number of read versus unread books on the index page. This test class has subsequent tests which verify the expected number of read books, which would fail if this test changes that number.
-
-Given integration tests consume data from the back end and interface with the front end, at this stage we need to condsider how to manage test data. This is a challenge for all types of software testing, and while its not unique to Playwright its worth demoinstarting one solution applied to enable effectibe intrgtaion testing in the playwright framework.
+At this stage we need to consider how to manage test data. This is a challenge for all types of software testing, and while its not unique to Playwright its worth demonstrating one solution applied to enable effective integration testing in the playwright framework.
 
 In this project the solution adopted is to create a copy 'test' database using the same schema as the 'production' table, but populated with test data.
 
 As integration tests are run against an instance of a test database, the test can create, read, update or delete data without compromising the original data. To clear down test data, we keep a `test-seed.db` table with the original test data, this is copied over `test.db` by the global setup class, the tests then run and read/write/delete test data, but the original data is reset by the global teardown class.
 
-In other words before each test the @before action copies test-seed.db over the test.db, do each time thr `updating a book from unread to read` test run it starts with the book in question in an unread state, updates it, then the @after action resets that book record to 'unread'.
+In other words before each test the @beforeAll action copies test-seed.db over the test.db, so each time the `updating a book from unread to read` test run it starts with the book in question in an unread state, updates it, then the @afterAll action resets that book record to 'unread'.
 
+``` typescript
+test.beforeAll(() => {
+  const seed = path.resolve(process.cwd(), 'test-seed.db');
+  const target = path.resolve(process.cwd(), 'test.db');
+  execSync(`cp ${seed} ${target}`);
+});
+
+test.afterAll(() => {
+  const seed = path.resolve(process.cwd(), 'test-seed.db');
+  const target = path.resolve(process.cwd(), 'test.db');
+  execSync(`cp ${seed} ${target}`);
+}); 
+```
 
 ### Mocking data for component tests
 
-Considering the test `search for a book`, if this project involved hundreds/thousands of book titles, with many new test titles being added, we could not guarantee that our test value e.g. searching for 'green' would always return the result we expect. If we were only interetsed in verifying the  'No books found' message it would be safer mock the api response so that it always responds with no search results found (which in this case is an empty array of books titles). In this scenario, the test is purely the response generated for no search results, a discrete component.
+One of the required test cases is:
 
-The component test `'No books found' on screen when a book not found` calls the same api endpoint `http://localhost:8080/api/books/search?keyword=green, before we look at the test code itss helpful to inspect the api.
+- *Given I search for a book title which does not exist in the book database*
+- *When I click 'Search'*
+- *Then I should see the book does not exist*
+
+We could test this as an integration test, i.e. when the test clicks 'Search' the actual `search` api is invoked, and real data is read from the back end database. This works functionally, but given the test objective is purely the response generated when there are no search results, i.e. a discrete component rather than an integrated feature, it would be more efficient to mock the api response rather than make an api call to the backend.
+
+As an example of this , the component test `'No books found' on screen when a book not found` calls the same api endpoint `http://localhost:8080/api/books/search?keyword=green`, before we look at the test code its helpful to inspect the api.
 
 #### Inspecting REST APIs with Swagger
 
 In order to mock API responses, before we look at Playwright's powerful `page.route` tools we need to understand the API layout and content.
 
-We can check an API via Developer Tools → Network tab, but a more powerful tool is Swagger. Swagger lets us connect our REST APIs, view them in a list in a browser, and try them out. It's useful for this project as we can try out the books search API for the 'green' keyword to prove it returns no results before we write the test — without needing to run the app or trigger a real browser request.
+<details>
+<summary>Inspecting REST APIs with Swagger</summary>
+
+We can check an API via Developer Tools → Network tab, but using Swagger lets us connect our REST APIs, view them in a list in a browser, and try them out. It's useful for this project as we can try out the books search API for the 'green' keyword to prove it returns no results before we write the test — without needing to run the app or trigger a real browser request.
 
 To install, add a dependency to pom.xml:
 
@@ -142,20 +174,21 @@ To install, add a dependency to pom.xml:
 </dependency>
 {% endhighlight %}
 
-Checking the api details with Swagger allows us to confirm the url endpoint path (i.e. the request url) and the response body (in this simple example, the [] for an empty array).
+Checking the api details with Swagger allows us to confirm the url endpoint path (i.e. the request url) and the response body (in this simple example, the `[]` for an empty array).
 
-![Swagger showing the `**/api/books/search**` request and response api](/images/pw_swagger.jpg)
+![Swagger showing the **/api/books/search** request and response api](/images/pw_swagger.jpg)
 
+> Swagger isn't a requirement to write API tests, but it's very useful for understanding the API call and response before writing tests.
 
-> As mentioned Swagger isn't a requirement to write api tests, but I have found it very useful to understand the api call and response, and try it out before writing tests.
+</details>
 
 #### Page.route()
 
-TNow that we have visibility and an understanding of the API used when searching for a book, the `page.route` method extends that to allow us to modify the network requests that are made when 'Search' is clicked. This allows us to mock the API response - i.e. when the api endpoint in the test is hit the test uses a mocked json response as the api response, rather than call the actual back end database.
+Now that we have visibility and an understanding of the API used when searching for a book, the `page.route` method extends that to allow us to modify the network requests that are made when 'Search' is clicked. This allows us to mock the API response - i.e. when the api endpoint in the test is hit the test uses a mocked json response as the api response, rather than call the actual back end database.
 
 <b> Example</b>
 
-In the Swagger response we saw that the endpoint we need is `http://localhost:8080/api/books/search?keyword=green`. Given this is going to use mock data, we can drop the search word and intercept this path '**/api/books/search**'. This sets this api endpoint as the `route` object, we can apply the `function` action to return the mock json response, in the example below we want to return an empty array (to mock a search result with no books returned).
+In the Swagger response we saw that the endpoint is `http://localhost:8080/api/books/search?keyword=green`. Given this is going to use mock data, we can drop the search word and intercept this path '**/api/books/search**'. This sets this api endpoint as the `route` object, we can apply the `function` action to return the mock json response, in the example below we want to return an empty array `[]` (to mock a search result with no books returned).
 
 ``` typescript
 await page.route('**/api/books/search**', async route => {
@@ -167,13 +200,11 @@ body: JSON.stringify([])
 	});
 ```
 
-This triggers the 'No books found' message.
+This simple example triggers the 'No books found' message without having to read the back end database to confirm no search results found, and it ensures that even if we added many mock books to our test database, the search term for this specific test will always return the not found result- effectively just testing the not found response, not relying on data.
 
-This simple example ensures that even if we added many mock books to our test database, the search term for this specific test will always return the not found result- effectively just testing the not found response, not relying on data.
+The other advantage of using mock data is that we can test for edge cases by setting json responses which would be awkward with real data, for example when the front end fails to fetch data from the table.
 
-The other advantage of using mock data is that we can test for edge cases by setting json responses which would be awlward with real data, for example when the front end fails to fetch data from the table.
-
-In the test below, rather than `route.fulfil` to return our mock json we can test what would happen if the api failed to connect to the back end data by using [page.abort()](https://playwright.dev/docs/api/class-page#page-route). This aborts the loading of all the books fetched in the json array for the `books` api:
+In the test below, rather than `route.fulfill` to return our mock json we can test what would happen if the api failed to connect to the back end data by using [page.abort()](https://playwright.dev/docs/api/class-page#page-route). This aborts network request itself, so the json array for the `books` api does not load:
 
 ```typescript
 test('index page still renders even if books fail to load', async ({ indexPage, page, request }) => {
@@ -192,7 +223,7 @@ await expect(indexPage.totalBooks).toHaveText('0');
 });
 ```
 
-### Example Struture <br>
+### Example Structure <br>
 
 Figure 3 below summarises the structure covered above to illustrate the file structure for this project, there is not a default or requires structure but it is a logical approach to lay out test tets types, set up a dependancy with fixtures and pages etc.
 
@@ -226,11 +257,11 @@ The first time this test is run the baseline screenshot does not exist, and an e
 > A snapshot doesn't exist at:
 > `example.spec.ts-snapshots/example-test-1-chromium-darwin.png`
 
-However this initial run saves the screenshot in a `snapshots` folder, and this is the 'golden expectation' future test runs will use to compare the browser window snapshot:
+This initial run saves the screenshot in a `snapshots` folder, and this is the 'golden expectation' future test runs will use to compare the browser window snapshot:
 ![[Pasted image 20260424135404.png]]
 Now when visual comparison example test runs, it goes to the landing (index) page, and verifies the screen is exactly as per visual-comparison image in the `snapshots` folder.
 
-If we change the image on screen- for example the first book title is corrupted to `%Pieter^The L@tvian` the the image on screen is different to what is expected and the test fails as expected.
+If we change the image on screen- for example the first book title is corrupted to `%Pieter^The L@tvian` the image on screen is different to what is expected and the test fails as expected.
 
 Trace viewer helpfully shows us what the differences are:
 
@@ -244,9 +275,6 @@ One caveat with this tool is the screenshot may vary from device to device (diff
 In a CI/CD project, where many devs and QAs are pushing code to the main branch, adding Playwright tests to the pipeline means that browser regression testing can happen automatically as part of code integration.
 
 In this project, we have component and integration tests- note that other projects would also have an end to end folder (e2e) which would cover user action tests (e.g. log in, add records etc.) but for now we will add the component and integration tests to the CI pipeline.
-
-> **Note:** A project would also have unit tests, but these are at a lower level than component/e2e tests and have their own pipline step outside of Playwright.
-
 
 <!-- When selecting which tests to include in a pipeline, its useful to consider the testing pyramid. A software project would have many unit tests (which are discrete, and 'small'), and on top of that a 'narrower' layer of component and integration tests (which take more time and resource than unit tests) and on top of the pyramid, a lower amount of end to end tests (these would take longest to run.)
 

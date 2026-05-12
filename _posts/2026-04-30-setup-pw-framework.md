@@ -18,7 +18,7 @@ As of 2026 Playwright has become increasingly in demand in the role of a Softwar
 
 This post takes it a step further in setting up a playwright framework for a simple web app [simple web app](#system-under-test), demonstrates some of the key points around structure, using fixtures and pages for each test, api testing, managing test data and covers some of the powerful tools playwright has. This is by no means a full list of Playwright capabilities, but does give practical examples on how to go about structuring the playwright framework, and links to the Playwright documentation where appropriate if you want the full detail.
 
-> **Note:** By default Playwright (and other tools like Cypress) assume there is a third level at the top of the test pyramid, end to end (e2e). For this project given there are no detailed user actions such as auth log in, add/remove books the UI is >essentially covered in the integration tests, but be aware you would usually see an e2e level as well.
+> **Note:** the project and playwright framework is very much a WIP, but the tests, APIs and data structure are in working order and are good examples to illustrate the features covered in this post.
 
 
 ## System Under Test
@@ -38,7 +38,6 @@ The system under test for this post is an application I created which uses a sql
 
 ## Playwright Structure
 
-//TODO: Intro
 
 ### Abstracting page objects and helpers
 
@@ -83,6 +82,9 @@ The test folder for this project covers two different levels of testing- compone
 - Test the frontend in isolation
 - No backend needed (still needs the front end server running)
 - Faster, great for edge cases
+
+> **Note:** By default Playwright (and other tools like Cypress) assume there is a third level at the top of the test pyramid, end to end (e2e). For this project given there are no detailed user actions such as auth log in, add/remove books the UI is currently is covered in the integration tests, but be aware you would usually see an e2e level as well.
+
 
 In [integration tests](#integration-tests) we look at a straightforward example to see Playwright syntax, and also consider how to handle test data where an integration test does a write/update action. The project's [component tests](#mocking-data-for-component-tests) includes tests which mock data, and we look at page.route().
 
@@ -223,11 +225,61 @@ await expect(indexPage.totalBooks).toHaveText('0');
 });
 ```
 
+### Frame Locator
+
+https://playwright.dev/docs/api/class-framelocator
+
+
+The web application displays book cards (book title, publish details etc) and also a button to open Open Library details about that book. That data is fetched in an <b>iframe</b>, i.e. another html page embedded inside the original web page.
+
+![An example book card with the Open Library data displayed in an iframe](/images/pw_iframe.jpg)
+
+This can represent a challenge when building ui tests (especially if there is a cross domain element), its effectively opening another browsing context within the existing DOM, which can complicate selectors.
+
+However playwright  has a useful `FrameLocator` class which scopes locator access to within that frame, so they can be accessed within the parent page context.
+
+Cross-origin iframes can be a challenge in other tools like Selenium, but Playwright handles them cleanly via `contentFrame()`— as this test demonstrates with an embedded openlibrary.org frame inside a localhost app. The test below opens an Open Library iframe for a selected book, verifies the content has loaded, and confirms tab interaction works within the frame.
+
+``` typescript
+test('opening the Open Library info for a selected book', async ({ indexPage, page }) => {
+
+await indexPage.goto();
+await indexPage.libraryBtn("Olaf the Lithuanian", 'Open').click();
+
+// set const to get the iframe for the selected book
+
+const iframeLocator = page.locator('iframe[id="library-frame-Olaf the Lithuanian"]');
+
+// Wait until Open Library src is loaded into the iframe
+
+await expect(iframeLocator).toHaveAttribute('src', /openlibrary\.org/, { timeout: 10000 }); 
+
+// contentFrame() returns a FrameLocator — gives full Playwright locator access inside the iframe
+
+const openLibraryFrame = iframeLocator.contentFrame();
+
+// verifies the book card has loaded the Open Library logo
+
+await openLibraryFrame
+.locator('img.logo-icon[alt="Open Library logo"]')
+.waitFor({ state: 'visible', timeout: 15000 });
+
+// verifies able to use elements within the iframe to interact, click and change tabs
+
+await openLibraryFrame
+.getByRole('link', { name: 'Details' })
+.click();
+  await expect(openLibraryFrame.getByTitle('Book Details')).toBeVisible();
+
+}) 
+```
+
 ### Example Structure <br>
 
-Figure 3 below summarises the structure covered above to illustrate the file structure for this project, there is not a default or requires structure but it is a logical approach to lay out test tets types, set up a dependancy with fixtures and pages etc.
+The file tree below summarises the structure for this project, while there isn't a set Playwright file structure this is a standard example of where the key folders and classes should sit:
 
-![Project structure diagram](/images/playwright_project_structure_v4.svg)
+<iframe src="/resources/PW_Maigret_file_tree.html" width="100%" height="400"></iframe>
+<!-- ![Project structure diagram](/resources/PW_Maigret_file_tree.html) -->
 
 
 ## Playwright tools
@@ -326,7 +378,7 @@ To add the initial baseline screenshot, or to update it if the screen/page has b
 npx playwright test tests/integration --update-snapshots
 ```
 
-This saves the baseline images from a succesful test run in tests/integration/...snapshots:
+This saves the baseline images from a successful test run in tests/integration/...snapshots:
 ![Pipeline snapshots folder](/images/pw_snapshots_folder.jpg)
 
 The images are then updated and the visual comparison tests pass in the pipeline:
@@ -335,4 +387,6 @@ The images are then updated and the visual comparison tests pass in the pipeline
 
 ##Summary
 
+This example project proved an ideal opportunity to apply an initial playwright structure using Playwright POM model (with abstracted pages and fixtures). My advice when applying a Playwright framework is to look at the system under test and map that structure to the Pages model, the [file structure example](#example-structure) above and the Playwright documentation will help guide on best practice on placing the related files from there.
 
+This post also covered some of the classes and tools available in Playwright, this is just a sample but the page.route for APIs, the frame.locator and image comparison are good examples of productive, useful tools which make Playwright a productive tool for the test automation engineer.

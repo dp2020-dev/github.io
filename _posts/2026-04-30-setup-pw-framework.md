@@ -385,7 +385,7 @@ The images are then updated and the visual comparison tests pass in the pipeline
 
 ![Passing visual comparison tests pass in the pipeline:](/images/pw_visual_passing_pipeline.jpg)
 
-##Summary
+## Summary
 
 This example project proved an ideal opportunity to apply an initial playwright structure using Playwright POM model (with abstracted pages and fixtures). My advice when applying a Playwright framework is to look at the system under test and map that structure to the Pages model, the [file structure example](#example-structure) above and the Playwright documentation will help guide on best practice on placing the related files from there.
 

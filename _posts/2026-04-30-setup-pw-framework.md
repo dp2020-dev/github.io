@@ -227,9 +227,6 @@ await expect(indexPage.totalBooks).toHaveText('0');
 
 ### Frame Locator
 
-https://playwright.dev/docs/api/class-framelocator
-
-
 The web application displays book cards (book title, publish details etc) and also a button to open Open Library details about that book. That data is fetched in an <b>iframe</b>, i.e. another html page embedded inside the original web page.
 
 ![An example book card with the Open Library data displayed in an iframe](/images/pw_iframe.jpg)
@@ -274,6 +271,8 @@ await openLibraryFrame
 }) 
 ```
 
+For more detail on `frame.locator` see the [official documentation.](https://playwright.dev/docs/api/class-framelocator)
+
 ### Example Structure <br>
 
 The file tree below summarises the structure for this project, while there isn't a set Playwright file structure this is a standard example of where the key folders and classes should sit:
@@ -288,7 +287,7 @@ The scope and range of tools in Playwright is extensive, but these are some exam
 
 ### Visual Comparisons
 
-https://playwright.dev/docs/test-snapshots
+
 
 In my experience, the have been many test scenarios which have required validating a pdf letter generated, summary document etc. which have acceptance criteria related to formatting (font, text colour, layout, images etc.)
 
@@ -310,18 +309,22 @@ The first time this test is run the baseline screenshot does not exist, and an e
 > `example.spec.ts-snapshots/example-test-1-chromium-darwin.png`
 
 This initial run saves the screenshot in a `snapshots` folder, and this is the 'golden expectation' future test runs will use to compare the browser window snapshot:
-![[Pasted image 20260424135404.png]]
+![](/images/pw_baseline_screenshot.jpg)
 Now when visual comparison example test runs, it goes to the landing (index) page, and verifies the screen is exactly as per visual-comparison image in the `snapshots` folder.
 
 If we change the image on screen- for example the first book title is corrupted to `%Pieter^The L@tvian` the image on screen is different to what is expected and the test fails as expected.
 
-Trace viewer helpfully shows us what the differences are:
+![Note the book title has been corrupted](/images/pw_corrupted_book_title.jpg)
 
-![traceviewer for visual comparison](/images/)
+Trace viewer helpfully shows what the differences are:
 
-This is a simple example, and a more practical use case would be verifying formatting, layout, fonts etc. but this does demonstrate the functionality.
+![traceviewer for visual comparison](/images/pw_corrupted_book_title_traceviewer.jpg)
+
+This is a simple example which demonstrate the utility of the tool, practical use cases would be to verify page layouts, fonts, colours etc.
 
 One caveat with this tool is the screenshot may vary from device to device (different resolution, browser settings etc.) so the recommended approach is to run these tests in a CI pipeline (so the environment, browser, OS etc. is stable and repeatable). These tests are applied to this project's pipeline in the section below.
+
+See the [Playwright documentation](https://playwright.dev/docs/test-snapshots) for more information on the visual comparison tool.
 
 ## Running tests in a CI pipeline
 In a CI/CD project, where many devs and QAs are pushing code to the main branch, adding Playwright tests to the pipeline means that browser regression testing can happen automatically as part of code integration.
